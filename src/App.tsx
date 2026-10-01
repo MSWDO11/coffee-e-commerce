@@ -6,181 +6,6 @@ interface CartItem {
   quantity: number;
 }
 
-// Unique ID counter to avoid SVG gradient ID collisions
-let _uid = 0;
-
-// Coffee illustration component - unique per product, no external images
-function CoffeeIllustration({ product, className = "" }: { product: Product; className?: string }) {
-  const [uid] = useState(() => ++_uid);
-  const bgId = `bg-${uid}`;
-  const beanId = `bean-${uid}`;
-
-  // Product-specific color palettes
-  const palettes: Record<number, { bg1: string; bg2: string; bean: string; beanDark: string; accent: string; bag: string; label: string }> = {
-    1: { bg1: "#fef3e2", bg2: "#fde8cc", bean: "#b8864e", beanDark: "#7a5430", accent: "#e8a85c", bag: "#faf0e0", label: "#fff8ef" }, // Ethiopian - warm golden
-    2: { bg1: "#f5ece0", bg2: "#efe3d2", bean: "#8b5e3c", beanDark: "#5c3a22", accent: "#c4956a", bag: "#f8f0e4", label: "#fffcf5" }, // Colombian - rich caramel
-    3: { bg1: "#e8ddd0", bg2: "#d9ccbb", bean: "#3d2314", beanDark: "#1a0e08", accent: "#6b4430", bag: "#ede5d8", label: "#f5efe7" }, // Midnight Velvet - deep dark
-    4: { bg1: "#fef5e8", bg2: "#fdecd4", bean: "#a06030", beanDark: "#6b3820", accent: "#d4764a", bag: "#faf0e0", label: "#fff8ef" }, // Kenyan - bright berry
-    5: { bg1: "#f8f0e4", bg2: "#f0e4d4", bean: "#8b6840", beanDark: "#5c4028", accent: "#c4a06a", bag: "#f5ede0", label: "#fffcf5" }, // Morning Ritual - soft warm
-    6: { bg1: "#e5ddd2", bg2: "#d5cab8", bean: "#4a3020", beanDark: "#2a1810", accent: "#7a5838", bag: "#e8e0d4", label: "#f0ebe0" }, // Sumatra - earthy dark
-  };
-  const p = palettes[product.id] || palettes[2];
-
-  return (
-    <svg viewBox="0 0 400 400" className={className} xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <radialGradient id={bgId} cx="50%" cy="40%" r="70%">
-          <stop offset="0%" stopColor={p.bg1} />
-          <stop offset="100%" stopColor={p.bg2} />
-        </radialGradient>
-        <radialGradient id={beanId} cx="35%" cy="30%" r="65%">
-          <stop offset="0%" stopColor={p.bean} />
-          <stop offset="100%" stopColor={p.beanDark} />
-        </radialGradient>
-        <filter id={`shadow-${uid}`}>
-          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.1" />
-        </filter>
-      </defs>
-
-      {/* Background */}
-      <rect width="400" height="400" fill={`url(#${bgId})`} />
-
-      {/* Product-specific decorative elements */}
-      {product.id === 1 && (
-        <g opacity="0.15">
-          {/* Ethiopian floral pattern */}
-          {[{x:60,y:60},{x:340,y:70},{x:50,y:340},{x:350,y:330},{x:200,y:30}].map((pos, i) => (
-            <g key={i} transform={`translate(${pos.x},${pos.y})`}>
-              <circle r="12" fill="none" stroke={p.accent} strokeWidth="1" />
-              <circle r="6" fill={p.accent} opacity="0.5" />
-              {[0,60,120,180,240,300].map(angle => (
-                <ellipse key={angle} cx={Math.cos(angle*Math.PI/180)*10} cy={Math.sin(angle*Math.PI/180)*10} rx="3" ry="5"
-                  fill={p.accent} opacity="0.4" transform={`rotate(${angle})`} />
-              ))}
-            </g>
-          ))}
-        </g>
-      )}
-      {product.id === 2 && (
-        <g opacity="0.12">
-          {/* Colombian mountain silhouette */}
-          <path d="M0,350 L80,280 L140,320 L200,260 L260,300 L320,250 L400,310 L400,400 L0,400Z" fill={p.bean} />
-          <path d="M0,370 L100,330 L180,360 L280,320 L400,350 L400,400 L0,400Z" fill={p.beanDark} opacity="0.5" />
-        </g>
-      )}
-      {product.id === 3 && (
-        <g opacity="0.08">
-          {/* Dark velvet texture */}
-          {Array.from({length: 30}, (_, i) => (
-            <circle key={i} cx={(i*47)%400} cy={(i*83)%400} r={(i%3)+1} fill={p.beanDark} />
-          ))}
-        </g>
-      )}
-      {product.id === 4 && (
-        <g opacity="0.12">
-          {/* Kenyan sun rays */}
-          {Array.from({length: 12}, (_, i) => {
-            const angle = (i * 30) * Math.PI / 180;
-            return <line key={i} x1="200" y1="200" x2={200+Math.cos(angle)*180} y2={200+Math.sin(angle)*180} stroke={p.accent} strokeWidth="1" />;
-          })}
-          <circle cx="200" cy="200" r="40" fill={p.accent} opacity="0.15" />
-        </g>
-      )}
-      {product.id === 5 && (
-        <g opacity="0.1">
-          {/* Morning sun glow */}
-          <circle cx="320" cy="80" r="60" fill={p.accent} />
-          <circle cx="320" cy="80" r="40" fill={p.bg1} />
-        </g>
-      )}
-      {product.id === 6 && (
-        <g opacity="0.1">
-          {/* Sumatra leaf patterns */}
-          {[{x:50,y:100,r:20},{x:350,y:150,r:15},{x:80,y:300,r:18},{x:330,y:350,r:12}].map((leaf, i) => (
-            <g key={i} transform={`translate(${leaf.x},${leaf.y}) rotate(${i*45})`}>
-              <path d={`M0,-${leaf.r} Q${leaf.r*0.5},0 0,${leaf.r} Q-${leaf.r*0.5},0 0,-${leaf.r}`} fill={p.bean} />
-              <line x1="0" y1={`-${leaf.r}`} x2="0" y2={leaf.r} stroke={p.beanDark} strokeWidth="0.5" />
-            </g>
-          ))}
-        </g>
-      )}
-
-      {/* Coffee bag - main element */}
-      <g transform="translate(120, 70)" filter={`url(#shadow-${uid})`}>
-        {/* Bag body */}
-        <path d="M15,55 L15,230 Q15,250 35,250 L125,250 Q145,250 145,230 L145,55 Q145,35 125,35 L35,35 Q15,35 15,55Z"
-              fill={p.bag} stroke={p.beanDark} strokeWidth="1.5" />
-        {/* Bag top fold */}
-        <path d="M25,35 L25,15 Q25,5 40,5 L120,5 Q135,5 135,15 L135,35"
-              fill={p.bag} stroke={p.beanDark} strokeWidth="1.5" />
-        {/* Fold crease lines */}
-        <line x1="40" y1="35" x2="40" y2="15" stroke={p.beanDark} strokeWidth="0.5" opacity="0.3" />
-        <line x1="120" y1="35" x2="120" y2="15" stroke={p.beanDark} strokeWidth="0.5" opacity="0.3" />
-        {/* Bag clip/seal */}
-        <rect x="55" y="0" width="50" height="14" rx="4" fill={p.bean} />
-        <rect x="60" y="3" width="40" height="8" rx="2" fill={p.beanDark} opacity="0.3" />
-
-        {/* Label */}
-        <rect x="30" y="80" width="100" height="120" rx="10" fill={p.label} stroke={p.accent} strokeWidth="1.5" />
-        {/* Label inner border */}
-        <rect x="35" y="85" width="90" height="110" rx="7" fill="none" stroke={p.accent} strokeWidth="0.5" opacity="0.5" />
-
-        {/* Origin text */}
-        <text x="80" y="110" textAnchor="middle" fontSize="11" fill={p.beanDark} fontWeight="bold" fontFamily="serif">
-          {product.origin.split(" ")[0]}
-        </text>
-        {/* Divider */}
-        <line x1="48" y1="120" x2="112" y2="120" stroke={p.accent} strokeWidth="1" />
-        {/* Product name */}
-        <text x="80" y="138" textAnchor="middle" fontSize="7" fill={p.bean} fontFamily="sans-serif" fontWeight="500">
-          {product.name.split(" ").slice(0, 2).join(" ")}
-        </text>
-        {/* Roast level */}
-        <text x="80" y="155" textAnchor="middle" fontSize="8" fill={p.beanDark} fontFamily="sans-serif" fontWeight="bold">
-          {product.roast.toUpperCase()}
-        </text>
-        {/* Weight */}
-        <text x="80" y="172" textAnchor="middle" fontSize="7" fill={p.bean} fontFamily="sans-serif">
-          {product.weight}
-        </text>
-        {/* Bean icon */}
-        <g transform="translate(80, 188)">
-          <ellipse rx="10" ry="6" fill={p.bean} />
-          <path d="M-6,0 Q0,-3 6,0" fill="none" stroke={p.beanDark} strokeWidth="1" />
-        </g>
-      </g>
-
-      {/* Scattered coffee beans */}
-      {[
-        { x: 55, y: 160, r: 14, rot: 25 },
-        { x: 345, y: 130, r: 11, rot: -15 },
-        { x: 45, y: 290, r: 13, rot: 50 },
-        { x: 350, y: 260, r: 10, rot: -30 },
-        { x: 310, y: 350, r: 13, rot: -40 },
-        { x: 90, y: 355, r: 11, rot: 65 },
-        { x: 200, y: 370, r: 9, rot: 10 },
-        { x: 30, y: 210, r: 9, rot: -55 },
-        { x: 370, y: 190, r: 8, rot: 35 },
-      ].map((b, i) => (
-        <g key={i} transform={`translate(${b.x}, ${b.y}) rotate(${b.rot})`}>
-          <ellipse rx={b.r} ry={b.r * 0.62} fill={`url(#${beanId})`} />
-          <path d={`M${-b.r * 0.55},0 Q0,${-b.r * 0.28} ${b.r * 0.55},0`}
-                fill="none" stroke={p.beanDark} strokeWidth="1.2" opacity="0.5" />
-          {/* Bean highlight */}
-          <ellipse cx={-b.r*0.2} cy={-b.r*0.15} rx={b.r*0.25} ry={b.r*0.15} fill="white" opacity="0.15" />
-        </g>
-      ))}
-
-      {/* Aroma/steam wisps */}
-      <g opacity="0.25">
-        <path d="M175,65 Q180,45 175,25" fill="none" stroke={p.bean} strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M195,60 Q200,40 195,20" fill="none" stroke={p.bean} strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M215,65 Q220,45 215,25" fill="none" stroke={p.bean} strokeWidth="1.5" strokeLinecap="round" />
-      </g>
-    </svg>
-  );
-}
-
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -269,7 +94,6 @@ function App() {
     setIsCheckout(false);
   }, []);
 
-  // Lock body scroll when modals are open
   useEffect(() => {
     if (isCartOpen || selectedProduct || isCheckout || orderPlaced) {
       document.body.style.overflow = "hidden";
@@ -281,7 +105,6 @@ function App() {
     };
   }, [isCartOpen, selectedProduct, isCheckout, orderPlaced]);
 
-  // Keyboard support - ESC to close modals
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -298,7 +121,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#faf7f2] text-[#2c1810] font-sans">
-      {/* Toast Notification */}
+      {/* Toast */}
       {toast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] animate-fade-in">
           <div className="bg-[#3d2314] text-white px-5 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2">
@@ -314,19 +137,14 @@ function App() {
       <header className="sticky top-0 z-40 bg-[#faf7f2]/95 backdrop-blur-sm border-b border-[#e8ddd0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Logo */}
-            <button 
+            <button
               onClick={() => { setSearchQuery(""); setSelectedCategory("All"); setSelectedProduct(null); setIsCartOpen(false); setIsCheckout(false); }}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <span className="text-2xl">☕</span>
               <div className="text-left">
-                <h1 className="text-lg sm:text-xl font-serif font-bold text-[#3d2314] tracking-tight">
-                  Ember & Bloom
-                </h1>
-                <p className="text-[10px] sm:text-xs text-[#8b6f47] tracking-widest uppercase hidden sm:block">
-                  Specialty Coffee Roasters
-                </p>
+                <h1 className="text-lg sm:text-xl font-serif font-bold text-[#3d2314] tracking-tight">Ember & Bloom</h1>
+                <p className="text-[10px] sm:text-xs text-[#8b6f47] tracking-widest uppercase hidden sm:block">Specialty Coffee Roasters</p>
               </div>
             </button>
 
@@ -338,16 +156,13 @@ function App() {
                   placeholder="Search coffees, origins, flavors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e0d5c5] rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#c4956a]/40 focus:border-[#c4956a] transition-all placeholder:text-[#b8a089]"
+                  className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#e0d5c5] rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#c4956a]/40 focus:border-[#c4956a] transition-all placeholder:text-[#b8a089]"
                 />
                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#b8a089]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#e8ddd0] hover:bg-[#d4c4b0] transition-colors"
-                  >
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#e8ddd0] hover:bg-[#d4c4b0] transition-colors">
                     <svg className="w-3 h-3 text-[#5c3d2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -356,25 +171,13 @@ function App() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Mobile search toggle */}
-              <button
-                onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                className="md:hidden p-2 rounded-full hover:bg-[#f0e8dc] transition-colors"
-                aria-label="Toggle search"
-              >
+              <button onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="md:hidden p-2 rounded-full hover:bg-[#f0e8dc] transition-colors" aria-label="Toggle search">
                 <svg className="w-5 h-5 text-[#5c3d2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
-
-              {/* Cart button */}
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative p-2 sm:p-2.5 rounded-full hover:bg-[#f0e8dc] transition-colors"
-                aria-label="Open cart"
-              >
+              <button onClick={() => setIsCartOpen(true)} className="relative p-2 sm:p-2.5 rounded-full hover:bg-[#f0e8dc] transition-colors" aria-label="Open cart">
                 <svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#5c3d2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
@@ -387,7 +190,6 @@ function App() {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
           {mobileSearchOpen && (
             <div className="md:hidden pb-3">
               <div className="relative">
@@ -403,10 +205,7 @@ function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#e8ddd0] hover:bg-[#d4c4b0] transition-colors"
-                  >
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#e8ddd0] hover:bg-[#d4c4b0] transition-colors">
                     <svg className="w-3 h-3 text-[#5c3d2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -418,7 +217,7 @@ function App() {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#3d2314] via-[#5c3d2e] to-[#2c1810] text-white">
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-10 left-10 w-40 h-40 rounded-full bg-white/20 blur-3xl"></div>
@@ -426,17 +225,14 @@ function App() {
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-28">
           <div className="max-w-2xl">
-            <p className="text-[#c4956a] text-sm tracking-widest uppercase mb-3 font-medium">
-              Freshly Roasted to Order
-            </p>
+            <p className="text-[#c4956a] text-sm tracking-widest uppercase mb-3 font-medium">Freshly Roasted to Order</p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold leading-tight mb-4">
-              Discover Coffee<br />
-              <span className="text-[#e8c9a0]">Worth Savoring</span>
+              Discover Coffee<br /><span className="text-[#e8c9a0]">Worth Savoring</span>
             </h2>
             <p className="text-[#d4c4b0] text-base sm:text-lg leading-relaxed max-w-lg">
               Hand-selected beans from the world's finest growing regions, roasted in small batches to reveal their unique character.
             </p>
-            <button 
+            <button
               onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
               className="mt-6 inline-flex items-center gap-2 bg-[#c4956a] text-white px-6 py-3 rounded-full font-medium hover:bg-[#d4a574] transition-colors active:scale-95"
             >
@@ -449,7 +245,7 @@ function App() {
         </div>
       </section>
 
-      {/* Category Filters */}
+      {/* Filters */}
       <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {categories.map((category) => (
@@ -529,9 +325,7 @@ function App() {
             </div>
           </div>
           <div className="border-t border-[#5c3d2e] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#a08b73]">
-              © 2026 Ember & Bloom Coffee Roasters. All rights reserved.
-            </p>
+            <p className="text-sm text-[#a08b73]">© 2026 Ember & Bloom Coffee Roasters. All rights reserved.</p>
           </div>
         </div>
       </footer>
@@ -560,7 +354,7 @@ function App() {
         />
       )}
 
-      {/* Checkout Page */}
+      {/* Checkout */}
       {isCheckout && !orderPlaced && (
         <CheckoutPage
           cart={cart}
@@ -571,21 +365,13 @@ function App() {
       )}
 
       {/* Order Confirmation */}
-      {orderPlaced && (
-        <OrderConfirmation onClose={resetAfterOrder} />
-      )}
+      {orderPlaced && <OrderConfirmation onClose={resetAfterOrder} />}
     </div>
   );
 }
 
-// Product Card Component
-function ProductCard({
-  product,
-  onViewDetails,
-  onAddToCart,
-  isInCart,
-  isJustAdded,
-}: {
+// Product Card
+function ProductCard({ product, onViewDetails, onAddToCart, isInCart, isJustAdded }: {
   product: Product;
   onViewDetails: () => void;
   onAddToCart: () => void;
@@ -593,11 +379,9 @@ function ProductCard({
   isJustAdded: boolean;
 }) {
   const roastColor =
-    product.roast === "Light"
-      ? "bg-[#d4a574]"
-      : product.roast === "Medium" || product.roast === "Medium-Light"
-      ? "bg-[#8b5e3c]"
-      : "bg-[#3d2314]";
+    product.roast === "Light" ? "bg-[#d4a574]"
+    : product.roast === "Medium" || product.roast === "Medium-Light" ? "bg-[#8b5e3c]"
+    : "bg-[#3d2314]";
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-[#ede5d8] hover:shadow-xl hover:shadow-[#c4956a]/10 transition-all duration-300 hover:-translate-y-1">
@@ -608,7 +392,12 @@ function ProductCard({
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onViewDetails(); } }}
       >
-        <CoffeeIllustration product={product} className="w-full h-full group-hover:scale-105 transition-transform duration-500" />
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
         <div className="absolute top-3 left-3 flex gap-2">
           <span className={`${roastColor} text-white text-xs px-2.5 py-1 rounded-full font-medium shadow-sm`}>
             {product.roast} Roast
@@ -621,9 +410,7 @@ function ProductCard({
         </div>
       </div>
       <div className="p-5">
-        <p className="text-xs text-[#c4956a] font-medium tracking-wide uppercase mb-1">
-          {product.origin}
-        </p>
+        <p className="text-xs text-[#c4956a] font-medium tracking-wide uppercase mb-1">{product.origin}</p>
         <h3
           className="font-serif text-lg font-bold text-[#2c1810] mb-2 cursor-pointer hover:text-[#c4956a] transition-colors"
           onClick={onViewDetails}
@@ -635,52 +422,28 @@ function ProductCard({
         </h3>
         <div className="flex flex-wrap gap-1.5 mb-4">
           {product.notes.slice(0, 3).map((note) => (
-            <span
-              key={note}
-              className="text-xs bg-[#faf3ea] text-[#8b6f47] px-2 py-0.5 rounded-full"
-            >
-              {note}
-            </span>
+            <span key={note} className="text-xs bg-[#faf3ea] text-[#8b6f47] px-2 py-0.5 rounded-full">{note}</span>
           ))}
           {product.notes.length > 3 && (
             <span className="text-xs text-[#b8a089]">+{product.notes.length - 3}</span>
           )}
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-[#3d2314]">
-            ${product.price.toFixed(2)}
-          </span>
+          <span className="text-xl font-bold text-[#3d2314]">${product.price.toFixed(2)}</span>
           <button
             onClick={(e) => { e.stopPropagation(); onAddToCart(); }}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
-              isJustAdded 
-                ? "bg-green-600 text-white" 
-                : isInCart 
-                  ? "bg-[#5c3d2e] text-white hover:bg-[#3d2314]" 
-                  : "bg-[#3d2314] text-white hover:bg-[#5c3d2e]"
+              isJustAdded ? "bg-green-600 text-white"
+              : isInCart ? "bg-[#5c3d2e] text-white hover:bg-[#3d2314]"
+              : "bg-[#3d2314] text-white hover:bg-[#5c3d2e]"
             }`}
           >
             {isJustAdded ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Added!
-              </>
+              <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Added!</>
             ) : isInCart ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add More
-              </>
+              <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>Add More</>
             ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add
-              </>
+              <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>Add</>
             )}
           </button>
         </div>
@@ -690,11 +453,7 @@ function ProductCard({
 }
 
 // Product Detail Modal
-function ProductDetailModal({
-  product,
-  onClose,
-  onAddToCart,
-}: {
+function ProductDetailModal({ product, onClose, onAddToCart }: {
   product: Product;
   onClose: () => void;
   onAddToCart: () => void;
@@ -703,58 +462,33 @@ function ProductDetailModal({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-[#faf7f2] w-full sm:max-w-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto rounded-t-2xl shadow-2xl">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm"
-          aria-label="Close"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors shadow-sm" aria-label="Close">
           <svg className="w-5 h-5 text-[#5c3d2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-
         <div className="sm:flex">
           <div className="sm:w-1/2 aspect-square bg-[#f5efe7]">
-            <CoffeeIllustration product={product} className="w-full h-full" />
+            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
           </div>
           <div className="sm:w-1/2 p-6 sm:p-8">
-            <p className="text-xs text-[#c4956a] font-medium tracking-wide uppercase mb-1">
-              {product.origin} · {product.category}
-            </p>
-            <h2 className="font-serif text-2xl font-bold text-[#2c1810] mb-2">
-              {product.name}
-            </h2>
+            <p className="text-xs text-[#c4956a] font-medium tracking-wide uppercase mb-1">{product.origin} · {product.category}</p>
+            <h2 className="font-serif text-2xl font-bold text-[#2c1810] mb-2">{product.name}</h2>
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-2xl font-bold text-[#3d2314]">
-                ${product.price.toFixed(2)}
-              </span>
+              <span className="text-2xl font-bold text-[#3d2314]">${product.price.toFixed(2)}</span>
               <span className="text-sm text-[#8b6f47] bg-[#f0e8dc] px-2 py-0.5 rounded-full">{product.weight}</span>
             </div>
-
-            <p className="text-[#5c3d2e] text-sm leading-relaxed mb-5">
-              {product.description}
-            </p>
-
+            <p className="text-[#5c3d2e] text-sm leading-relaxed mb-5">{product.description}</p>
             <div className="mb-5">
-              <p className="text-xs font-medium text-[#8b6f47] uppercase tracking-wide mb-2">
-                Tasting Notes
-              </p>
+              <p className="text-xs font-medium text-[#8b6f47] uppercase tracking-wide mb-2">Tasting Notes</p>
               <div className="flex flex-wrap gap-2">
                 {product.notes.map((note) => (
-                  <span
-                    key={note}
-                    className="text-sm bg-[#f0e8dc] text-[#5c3d2e] px-3 py-1 rounded-full"
-                  >
-                    {note}
-                  </span>
+                  <span key={note} className="text-sm bg-[#f0e8dc] text-[#5c3d2e] px-3 py-1 rounded-full">{note}</span>
                 ))}
               </div>
             </div>
-
             <div className="mb-6">
-              <p className="text-xs font-medium text-[#8b6f47] uppercase tracking-wide mb-2">
-                Roast Level
-              </p>
+              <p className="text-xs font-medium text-[#8b6f47] uppercase tracking-wide mb-2">Roast Level</p>
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((level) => {
@@ -764,23 +498,14 @@ function ProductDetailModal({
                       product.roast === "Medium" ? 3 :
                       product.roast === "Dark" ? 5 : 3;
                     return (
-                      <div
-                        key={level}
-                        className={`w-6 h-2 rounded-full transition-colors ${
-                          level <= roastLevel ? "bg-[#5c3d2e]" : "bg-[#e8ddd0]"
-                        }`}
-                      />
+                      <div key={level} className={`w-6 h-2 rounded-full transition-colors ${level <= roastLevel ? "bg-[#5c3d2e]" : "bg-[#e8ddd0]"}`} />
                     );
                   })}
                 </div>
                 <span className="text-sm text-[#5c3d2e] font-medium">{product.roast}</span>
               </div>
             </div>
-
-            <button
-              onClick={onAddToCart}
-              className="w-full bg-[#3d2314] text-white py-3.5 rounded-full font-medium hover:bg-[#5c3d2e] transition-colors active:scale-[0.98] shadow-md shadow-[#3d2314]/20"
-            >
+            <button onClick={onAddToCart} className="w-full bg-[#3d2314] text-white py-3.5 rounded-full font-medium hover:bg-[#5c3d2e] transition-colors active:scale-[0.98] shadow-md shadow-[#3d2314]/20">
               Add to Cart — ${product.price.toFixed(2)}
             </button>
           </div>
@@ -791,14 +516,7 @@ function ProductDetailModal({
 }
 
 // Cart Sidebar
-function CartSidebar({
-  cart,
-  cartTotal,
-  onClose,
-  onUpdateQuantity,
-  onRemove,
-  onCheckout,
-}: {
+function CartSidebar({ cart, cartTotal, onClose, onUpdateQuantity, onRemove, onCheckout }: {
   cart: CartItem[];
   cartTotal: number;
   onClose: () => void;
@@ -810,80 +528,43 @@ function CartSidebar({
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[#faf7f2] shadow-2xl flex flex-col animate-slide-in">
-        {/* Cart Header */}
         <div className="flex items-center justify-between p-5 border-b border-[#e8ddd0]">
-          <h2 className="font-serif text-xl font-bold text-[#2c1810]">
-            Your Cart ({cart.reduce((s, i) => s + i.quantity, 0)})
-          </h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f0e8dc] transition-colors"
-            aria-label="Close cart"
-          >
+          <h2 className="font-serif text-xl font-bold text-[#2c1810]">Your Cart ({cart.reduce((s, i) => s + i.quantity, 0)})</h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f0e8dc] transition-colors" aria-label="Close cart">
             <svg className="w-5 h-5 text-[#5c3d2e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-
-        {/* Cart Items */}
         <div className="flex-1 overflow-y-auto p-5">
           {cart.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-5xl mb-3">🛒</p>
               <p className="text-[#8b6f47] text-lg font-medium">Your cart is empty</p>
               <p className="text-sm text-[#b8a089] mt-1 mb-6">Add some delicious coffee!</p>
-              <button
-                onClick={onClose}
-                className="bg-[#3d2314] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#5c3d2e] transition-colors active:scale-95"
-              >
+              <button onClick={onClose} className="bg-[#3d2314] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#5c3d2e] transition-colors active:scale-95">
                 Browse Coffees
               </button>
             </div>
           ) : (
             <div className="space-y-4">
               {cart.map((item) => (
-                <div
-                  key={item.product.id}
-                  className="flex gap-4 bg-white rounded-xl p-3 border border-[#ede5d8]"
-                >
+                <div key={item.product.id} className="flex gap-4 bg-white rounded-xl p-3 border border-[#ede5d8]">
                   <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#f5efe7]">
-                    <CoffeeIllustration product={item.product} className="w-full h-full" />
+                    <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-[#2c1810] text-sm truncate">
-                      {item.product.name}
-                    </h4>
+                    <h4 className="font-medium text-[#2c1810] text-sm truncate">{item.product.name}</h4>
                     <p className="text-xs text-[#8b6f47]">{item.product.weight} · ${item.product.price.toFixed(2)} each</p>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-1 bg-[#faf7f2] rounded-full p-0.5">
-                        <button
-                          onClick={() => onUpdateQuantity(item.product.id, -1)}
-                          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#e8ddd0] transition-colors text-[#5c3d2e] text-sm font-bold"
-                          aria-label="Decrease quantity"
-                        >
-                          −
-                        </button>
-                        <span className="w-8 text-center text-sm font-bold text-[#2c1810]">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => onUpdateQuantity(item.product.id, 1)}
-                          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#e8ddd0] transition-colors text-[#5c3d2e] text-sm font-bold"
-                          aria-label="Increase quantity"
-                        >
-                          +
-                        </button>
+                        <button onClick={() => onUpdateQuantity(item.product.id, -1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#e8ddd0] transition-colors text-[#5c3d2e] text-sm font-bold" aria-label="Decrease">−</button>
+                        <span className="w-8 text-center text-sm font-bold text-[#2c1810]">{item.quantity}</span>
+                        <button onClick={() => onUpdateQuantity(item.product.id, 1)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#e8ddd0] transition-colors text-[#5c3d2e] text-sm font-bold" aria-label="Increase">+</button>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-[#3d2314]">
-                          ${(item.product.price * item.quantity).toFixed(2)}
-                        </span>
-                        <button
-                          onClick={() => onRemove(item.product.id)}
-                          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 text-[#b8a089] hover:text-red-500 transition-colors"
-                          aria-label="Remove item"
-                        >
+                        <span className="text-sm font-bold text-[#3d2314]">${(item.product.price * item.quantity).toFixed(2)}</span>
+                        <button onClick={() => onRemove(item.product.id)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 text-[#b8a089] hover:text-red-500 transition-colors" aria-label="Remove">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
@@ -896,8 +577,6 @@ function CartSidebar({
             </div>
           )}
         </div>
-
-        {/* Cart Footer */}
         {cart.length > 0 && (
           <div className="border-t border-[#e8ddd0] p-5 space-y-3 bg-white">
             {cartTotal < 35 && (
@@ -907,23 +586,15 @@ function CartSidebar({
                   <span>${(35 - cartTotal).toFixed(2)} to go</span>
                 </div>
                 <div className="w-full h-1.5 bg-[#e8ddd0] rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#c4956a] rounded-full transition-all duration-500" 
-                    style={{ width: `${Math.min(100, (cartTotal / 35) * 100)}%` }}
-                  />
+                  <div className="h-full bg-[#c4956a] rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (cartTotal / 35) * 100)}%` }} />
                 </div>
               </div>
             )}
             <div className="flex items-center justify-between">
               <span className="text-[#8b6f47]">Subtotal</span>
-              <span className="text-xl font-bold text-[#2c1810]">
-                ${cartTotal.toFixed(2)}
-              </span>
+              <span className="text-xl font-bold text-[#2c1810]">${cartTotal.toFixed(2)}</span>
             </div>
-            <button
-              onClick={onCheckout}
-              className="w-full bg-[#3d2314] text-white py-3.5 rounded-full font-medium hover:bg-[#5c3d2e] transition-colors active:scale-[0.98] shadow-md shadow-[#3d2314]/20"
-            >
+            <button onClick={onCheckout} className="w-full bg-[#3d2314] text-white py-3.5 rounded-full font-medium hover:bg-[#5c3d2e] transition-colors active:scale-[0.98] shadow-md shadow-[#3d2314]/20">
               Proceed to Checkout
             </button>
           </div>
@@ -933,13 +604,8 @@ function CartSidebar({
   );
 }
 
-// Checkout Page
-function CheckoutPage({
-  cart,
-  cartTotal,
-  onBack,
-  onPlaceOrder,
-}: {
+// Checkout
+function CheckoutPage({ cart, cartTotal, onBack, onPlaceOrder }: {
   cart: CartItem[];
   cartTotal: number;
   onBack: () => void;
@@ -952,36 +618,19 @@ function CheckoutPage({
   return (
     <div className="fixed inset-0 z-50 bg-[#faf7f2] overflow-y-auto">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back button */}
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-[#5c3d2e] hover:text-[#3d2314] mb-6 transition-colors group"
-        >
+        <button onClick={onBack} className="flex items-center gap-2 text-[#5c3d2e] hover:text-[#3d2314] mb-6 transition-colors group">
           <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Cart
         </button>
-
-        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2c1810] mb-8">
-          Checkout
-        </h1>
-
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2c1810] mb-8">Checkout</h1>
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Form */}
           <form onSubmit={onPlaceOrder} className="lg:col-span-3 space-y-6">
-            {/* Contact */}
             <div className="bg-white rounded-2xl p-6 border border-[#ede5d8]">
               <h3 className="font-serif text-lg font-bold text-[#2c1810] mb-4">Contact</h3>
-              <input
-                type="email"
-                required
-                placeholder="Email address"
-                className="w-full px-4 py-3 border border-[#e0d5c5] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#c4956a]/40 focus:border-[#c4956a] placeholder:text-[#b8a089] transition-all"
-              />
+              <input type="email" required placeholder="Email address" className="w-full px-4 py-3 border border-[#e0d5c5] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#c4956a]/40 focus:border-[#c4956a] placeholder:text-[#b8a089] transition-all" />
             </div>
-
-            {/* Shipping */}
             <div className="bg-white rounded-2xl p-6 border border-[#ede5d8]">
               <h3 className="font-serif text-lg font-bold text-[#2c1810] mb-4">Shipping Address</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -992,8 +641,6 @@ function CheckoutPage({
                 <input type="text" required placeholder="ZIP code" className="px-4 py-3 border border-[#e0d5c5] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#c4956a]/40 focus:border-[#c4956a] placeholder:text-[#b8a089] transition-all" />
               </div>
             </div>
-
-            {/* Payment */}
             <div className="bg-white rounded-2xl p-6 border border-[#ede5d8]">
               <h3 className="font-serif text-lg font-bold text-[#2c1810] mb-4">Payment</h3>
               <div className="space-y-3">
@@ -1003,20 +650,12 @@ function CheckoutPage({
                   <input type="text" required placeholder="CVC" className="px-4 py-3 border border-[#e0d5c5] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#c4956a]/40 focus:border-[#c4956a] placeholder:text-[#b8a089] transition-all" />
                 </div>
               </div>
-              <p className="text-xs text-[#b8a089] mt-3">
-                🔒 This is a demo. No real payment will be processed.
-              </p>
+              <p className="text-xs text-[#b8a089] mt-3">🔒 This is a demo. No real payment will be processed.</p>
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#3d2314] text-white py-4 rounded-full font-medium text-lg hover:bg-[#5c3d2e] transition-colors active:scale-[0.98] shadow-lg shadow-[#3d2314]/20"
-            >
+            <button type="submit" className="w-full bg-[#3d2314] text-white py-4 rounded-full font-medium text-lg hover:bg-[#5c3d2e] transition-colors active:scale-[0.98] shadow-lg shadow-[#3d2314]/20">
               Place Order — ${total.toFixed(2)}
             </button>
           </form>
-
-          {/* Order Summary */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl p-6 border border-[#ede5d8] sticky top-24">
               <h3 className="font-serif text-lg font-bold text-[#2c1810] mb-4">Order Summary</h3>
@@ -1025,21 +664,15 @@ function CheckoutPage({
                   <div key={item.product.id} className="flex items-center gap-3">
                     <div className="relative flex-shrink-0">
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#f5efe7]">
-                        <CoffeeIllustration product={item.product} className="w-full h-full" />
+                        <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                       </div>
-                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#c4956a] text-white text-xs font-bold rounded-full flex items-center justify-center">
-                        {item.quantity}
-                      </span>
+                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#c4956a] text-white text-xs font-bold rounded-full flex items-center justify-center">{item.quantity}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#2c1810] truncate">
-                        {item.product.name}
-                      </p>
+                      <p className="text-sm font-medium text-[#2c1810] truncate">{item.product.name}</p>
                       <p className="text-xs text-[#8b6f47]">{item.product.weight}</p>
                     </div>
-                    <span className="text-sm font-medium text-[#3d2314]">
-                      ${(item.product.price * item.quantity).toFixed(2)}
-                    </span>
+                    <span className="text-sm font-medium text-[#3d2314]">${(item.product.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -1050,13 +683,7 @@ function CheckoutPage({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-[#8b6f47]">Shipping</span>
-                  <span className="text-[#2c1810]">
-                    {shipping === 0 ? (
-                      <span className="text-green-600 font-medium">Free</span>
-                    ) : (
-                      `$${shipping.toFixed(2)}`
-                    )}
-                  </span>
+                  <span className="text-[#2c1810]">{shipping === 0 ? <span className="text-green-600 font-medium">Free</span> : `$${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-[#8b6f47]">Tax (est.)</span>
@@ -1078,7 +705,6 @@ function CheckoutPage({
 // Order Confirmation
 function OrderConfirmation({ onClose }: { onClose: () => void }) {
   const [orderNumber] = useState(() => Math.floor(Math.random() * 90000 + 10000));
-  
   return (
     <div className="fixed inset-0 z-50 bg-[#faf7f2] flex items-center justify-center p-4">
       <div className="text-center max-w-md">
@@ -1087,23 +713,12 @@ function OrderConfirmation({ onClose }: { onClose: () => void }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="font-serif text-3xl font-bold text-[#2c1810] mb-3">
-          Order Confirmed!
-        </h2>
-        <p className="text-[#5c3d2e] mb-2">
-          Thank you for your order. Your coffee is being prepared with care.
-        </p>
-        <p className="text-sm text-[#8b6f47] mb-8">
-          Order #{orderNumber} · Estimated delivery in 3-5 business days
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={onClose}
-            className="bg-[#3d2314] text-white px-8 py-3 rounded-full font-medium hover:bg-[#5c3d2e] transition-colors active:scale-95"
-          >
-            Continue Shopping
-          </button>
-        </div>
+        <h2 className="font-serif text-3xl font-bold text-[#2c1810] mb-3">Order Confirmed!</h2>
+        <p className="text-[#5c3d2e] mb-2">Thank you for your order. Your coffee is being prepared with care.</p>
+        <p className="text-sm text-[#8b6f47] mb-8">Order #{orderNumber} · Estimated delivery in 3-5 business days</p>
+        <button onClick={onClose} className="bg-[#3d2314] text-white px-8 py-3 rounded-full font-medium hover:bg-[#5c3d2e] transition-colors active:scale-95">
+          Continue Shopping
+        </button>
       </div>
     </div>
   );
