@@ -6,84 +6,176 @@ interface CartItem {
   quantity: number;
 }
 
-// Coffee illustration component - always renders, no external images needed
+// Unique ID counter to avoid SVG gradient ID collisions
+let _uid = 0;
+
+// Coffee illustration component - unique per product, no external images
 function CoffeeIllustration({ product, className = "" }: { product: Product; className?: string }) {
-  const roastColors: Record<string, { bean: string; beanDark: string; bg: string; accent: string }> = {
-    "Light": { bean: "#c4956a", beanDark: "#a07850", bg: "#fef7ed", accent: "#e8c9a0" },
-    "Medium-Light": { bean: "#a07850", beanDark: "#7d5a3c", bg: "#fdf5ea", accent: "#d4a574" },
-    "Medium": { bean: "#7d5a3c", beanDark: "#5c3d2e", bg: "#f5efe7", accent: "#b8896a" },
-    "Dark": { bean: "#4a2c1a", beanDark: "#2c1810", bg: "#ede5d8", accent: "#6b4430" },
+  const [uid] = useState(() => ++_uid);
+  const bgId = `bg-${uid}`;
+  const beanId = `bean-${uid}`;
+
+  // Product-specific color palettes
+  const palettes: Record<number, { bg1: string; bg2: string; bean: string; beanDark: string; accent: string; bag: string; label: string }> = {
+    1: { bg1: "#fef3e2", bg2: "#fde8cc", bean: "#b8864e", beanDark: "#7a5430", accent: "#e8a85c", bag: "#faf0e0", label: "#fff8ef" }, // Ethiopian - warm golden
+    2: { bg1: "#f5ece0", bg2: "#efe3d2", bean: "#8b5e3c", beanDark: "#5c3a22", accent: "#c4956a", bag: "#f8f0e4", label: "#fffcf5" }, // Colombian - rich caramel
+    3: { bg1: "#e8ddd0", bg2: "#d9ccbb", bean: "#3d2314", beanDark: "#1a0e08", accent: "#6b4430", bag: "#ede5d8", label: "#f5efe7" }, // Midnight Velvet - deep dark
+    4: { bg1: "#fef5e8", bg2: "#fdecd4", bean: "#a06030", beanDark: "#6b3820", accent: "#d4764a", bag: "#faf0e0", label: "#fff8ef" }, // Kenyan - bright berry
+    5: { bg1: "#f8f0e4", bg2: "#f0e4d4", bean: "#8b6840", beanDark: "#5c4028", accent: "#c4a06a", bag: "#f5ede0", label: "#fffcf5" }, // Morning Ritual - soft warm
+    6: { bg1: "#e5ddd2", bg2: "#d5cab8", bean: "#4a3020", beanDark: "#2a1810", accent: "#7a5838", bag: "#e8e0d4", label: "#f0ebe0" }, // Sumatra - earthy dark
   };
-  const colors = roastColors[product.roast] || roastColors["Medium"];
+  const p = palettes[product.id] || palettes[2];
 
   return (
-    <svg viewBox="0 0 400 400" className={className} xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 400 400" className={className} xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
       <defs>
-        <radialGradient id={`bg-${product.id}`} cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor={colors.accent} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={colors.bg} stopOpacity="1" />
+        <radialGradient id={bgId} cx="50%" cy="40%" r="70%">
+          <stop offset="0%" stopColor={p.bg1} />
+          <stop offset="100%" stopColor={p.bg2} />
         </radialGradient>
-        <radialGradient id={`bean-grad-${product.id}`} cx="40%" cy="35%" r="60%">
-          <stop offset="0%" stopColor={colors.bean} />
-          <stop offset="100%" stopColor={colors.beanDark} />
+        <radialGradient id={beanId} cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor={p.bean} />
+          <stop offset="100%" stopColor={p.beanDark} />
         </radialGradient>
+        <filter id={`shadow-${uid}`}>
+          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.1" />
+        </filter>
       </defs>
-      
+
       {/* Background */}
-      <rect width="400" height="400" fill={`url(#bg-${product.id})`} />
-      
-      {/* Decorative circles */}
-      <circle cx="320" cy="80" r="40" fill={colors.accent} opacity="0.2" />
-      <circle cx="80" cy="320" r="60" fill={colors.accent} opacity="0.15" />
-      <circle cx="350" cy="300" r="25" fill={colors.bean} opacity="0.1" />
-      
-      {/* Coffee bag */}
-      <g transform="translate(120, 80)">
+      <rect width="400" height="400" fill={`url(#${bgId})`} />
+
+      {/* Product-specific decorative elements */}
+      {product.id === 1 && (
+        <g opacity="0.15">
+          {/* Ethiopian floral pattern */}
+          {[{x:60,y:60},{x:340,y:70},{x:50,y:340},{x:350,y:330},{x:200,y:30}].map((pos, i) => (
+            <g key={i} transform={`translate(${pos.x},${pos.y})`}>
+              <circle r="12" fill="none" stroke={p.accent} strokeWidth="1" />
+              <circle r="6" fill={p.accent} opacity="0.5" />
+              {[0,60,120,180,240,300].map(angle => (
+                <ellipse key={angle} cx={Math.cos(angle*Math.PI/180)*10} cy={Math.sin(angle*Math.PI/180)*10} rx="3" ry="5"
+                  fill={p.accent} opacity="0.4" transform={`rotate(${angle})`} />
+              ))}
+            </g>
+          ))}
+        </g>
+      )}
+      {product.id === 2 && (
+        <g opacity="0.12">
+          {/* Colombian mountain silhouette */}
+          <path d="M0,350 L80,280 L140,320 L200,260 L260,300 L320,250 L400,310 L400,400 L0,400Z" fill={p.bean} />
+          <path d="M0,370 L100,330 L180,360 L280,320 L400,350 L400,400 L0,400Z" fill={p.beanDark} opacity="0.5" />
+        </g>
+      )}
+      {product.id === 3 && (
+        <g opacity="0.08">
+          {/* Dark velvet texture */}
+          {Array.from({length: 30}, (_, i) => (
+            <circle key={i} cx={(i*47)%400} cy={(i*83)%400} r={(i%3)+1} fill={p.beanDark} />
+          ))}
+        </g>
+      )}
+      {product.id === 4 && (
+        <g opacity="0.12">
+          {/* Kenyan sun rays */}
+          {Array.from({length: 12}, (_, i) => {
+            const angle = (i * 30) * Math.PI / 180;
+            return <line key={i} x1="200" y1="200" x2={200+Math.cos(angle)*180} y2={200+Math.sin(angle)*180} stroke={p.accent} strokeWidth="1" />;
+          })}
+          <circle cx="200" cy="200" r="40" fill={p.accent} opacity="0.15" />
+        </g>
+      )}
+      {product.id === 5 && (
+        <g opacity="0.1">
+          {/* Morning sun glow */}
+          <circle cx="320" cy="80" r="60" fill={p.accent} />
+          <circle cx="320" cy="80" r="40" fill={p.bg1} />
+        </g>
+      )}
+      {product.id === 6 && (
+        <g opacity="0.1">
+          {/* Sumatra leaf patterns */}
+          {[{x:50,y:100,r:20},{x:350,y:150,r:15},{x:80,y:300,r:18},{x:330,y:350,r:12}].map((leaf, i) => (
+            <g key={i} transform={`translate(${leaf.x},${leaf.y}) rotate(${i*45})`}>
+              <path d={`M0,-${leaf.r} Q${leaf.r*0.5},0 0,${leaf.r} Q-${leaf.r*0.5},0 0,-${leaf.r}`} fill={p.bean} />
+              <line x1="0" y1={`-${leaf.r}`} x2="0" y2={leaf.r} stroke={p.beanDark} strokeWidth="0.5" />
+            </g>
+          ))}
+        </g>
+      )}
+
+      {/* Coffee bag - main element */}
+      <g transform="translate(120, 70)" filter={`url(#shadow-${uid})`}>
         {/* Bag body */}
-        <path d="M20,60 L20,220 Q20,240 40,240 L120,240 Q140,240 140,220 L140,60 Q140,40 120,40 L40,40 Q20,40 20,60Z" 
-              fill="#f5efe7" stroke={colors.beanDark} strokeWidth="2" />
-        {/* Bag fold top */}
-        <path d="M30,40 L30,20 Q30,10 45,10 L115,10 Q130,10 130,20 L130,40" 
-              fill="none" stroke={colors.beanDark} strokeWidth="2" />
-        {/* Bag fold clip */}
-        <rect x="60" y="5" width="40" height="12" rx="3" fill={colors.bean} />
-        
-        {/* Label on bag */}
-        <rect x="35" y="90" width="90" height="100" rx="8" fill="white" stroke={colors.accent} strokeWidth="1.5" />
-        <text x="80" y="120" textAnchor="middle" fontSize="10" fill={colors.beanDark} fontWeight="bold" fontFamily="serif">
+        <path d="M15,55 L15,230 Q15,250 35,250 L125,250 Q145,250 145,230 L145,55 Q145,35 125,35 L35,35 Q15,35 15,55Z"
+              fill={p.bag} stroke={p.beanDark} strokeWidth="1.5" />
+        {/* Bag top fold */}
+        <path d="M25,35 L25,15 Q25,5 40,5 L120,5 Q135,5 135,15 L135,35"
+              fill={p.bag} stroke={p.beanDark} strokeWidth="1.5" />
+        {/* Fold crease lines */}
+        <line x1="40" y1="35" x2="40" y2="15" stroke={p.beanDark} strokeWidth="0.5" opacity="0.3" />
+        <line x1="120" y1="35" x2="120" y2="15" stroke={p.beanDark} strokeWidth="0.5" opacity="0.3" />
+        {/* Bag clip/seal */}
+        <rect x="55" y="0" width="50" height="14" rx="4" fill={p.bean} />
+        <rect x="60" y="3" width="40" height="8" rx="2" fill={p.beanDark} opacity="0.3" />
+
+        {/* Label */}
+        <rect x="30" y="80" width="100" height="120" rx="10" fill={p.label} stroke={p.accent} strokeWidth="1.5" />
+        {/* Label inner border */}
+        <rect x="35" y="85" width="90" height="110" rx="7" fill="none" stroke={p.accent} strokeWidth="0.5" opacity="0.5" />
+
+        {/* Origin text */}
+        <text x="80" y="110" textAnchor="middle" fontSize="11" fill={p.beanDark} fontWeight="bold" fontFamily="serif">
           {product.origin.split(" ")[0]}
         </text>
-        <line x1="50" y1="130" x2="110" y2="130" stroke={colors.accent} strokeWidth="0.5" />
-        <text x="80" y="148" textAnchor="middle" fontSize="7" fill={colors.bean} fontFamily="sans-serif">
-          {product.roast} Roast
+        {/* Divider */}
+        <line x1="48" y1="120" x2="112" y2="120" stroke={p.accent} strokeWidth="1" />
+        {/* Product name */}
+        <text x="80" y="138" textAnchor="middle" fontSize="7" fill={p.bean} fontFamily="sans-serif" fontWeight="500">
+          {product.name.split(" ").slice(0, 2).join(" ")}
         </text>
-        {/* Small bean icon on label */}
-        <ellipse cx="80" cy="168" rx="8" ry="5" fill={colors.bean} />
-        <path d="M75,168 Q80,165 85,168" fill="none" stroke={colors.beanDark} strokeWidth="0.8" />
+        {/* Roast level */}
+        <text x="80" y="155" textAnchor="middle" fontSize="8" fill={p.beanDark} fontFamily="sans-serif" fontWeight="bold">
+          {product.roast.toUpperCase()}
+        </text>
+        {/* Weight */}
+        <text x="80" y="172" textAnchor="middle" fontSize="7" fill={p.bean} fontFamily="sans-serif">
+          {product.weight}
+        </text>
+        {/* Bean icon */}
+        <g transform="translate(80, 188)">
+          <ellipse rx="10" ry="6" fill={p.bean} />
+          <path d="M-6,0 Q0,-3 6,0" fill="none" stroke={p.beanDark} strokeWidth="1" />
+        </g>
       </g>
-      
+
       {/* Scattered coffee beans */}
       {[
-        { x: 60, y: 180, r: 12, rot: 30 },
-        { x: 340, y: 150, r: 10, rot: -20 },
-        { x: 50, y: 280, r: 11, rot: 45 },
-        { x: 330, y: 250, r: 9, rot: 10 },
-        { x: 300, y: 340, r: 12, rot: -35 },
-        { x: 100, y: 350, r: 10, rot: 60 },
-        { x: 200, y: 360, r: 8, rot: 15 },
+        { x: 55, y: 160, r: 14, rot: 25 },
+        { x: 345, y: 130, r: 11, rot: -15 },
+        { x: 45, y: 290, r: 13, rot: 50 },
+        { x: 350, y: 260, r: 10, rot: -30 },
+        { x: 310, y: 350, r: 13, rot: -40 },
+        { x: 90, y: 355, r: 11, rot: 65 },
+        { x: 200, y: 370, r: 9, rot: 10 },
+        { x: 30, y: 210, r: 9, rot: -55 },
+        { x: 370, y: 190, r: 8, rot: 35 },
       ].map((b, i) => (
         <g key={i} transform={`translate(${b.x}, ${b.y}) rotate(${b.rot})`}>
-          <ellipse rx={b.r} ry={b.r * 0.65} fill={`url(#bean-grad-${product.id})`} />
-          <path d={`M${-b.r * 0.6},0 Q0,${-b.r * 0.3} ${b.r * 0.6},0`} 
-                fill="none" stroke={colors.beanDark} strokeWidth="1" opacity="0.6" />
+          <ellipse rx={b.r} ry={b.r * 0.62} fill={`url(#${beanId})`} />
+          <path d={`M${-b.r * 0.55},0 Q0,${-b.r * 0.28} ${b.r * 0.55},0`}
+                fill="none" stroke={p.beanDark} strokeWidth="1.2" opacity="0.5" />
+          {/* Bean highlight */}
+          <ellipse cx={-b.r*0.2} cy={-b.r*0.15} rx={b.r*0.25} ry={b.r*0.15} fill="white" opacity="0.15" />
         </g>
       ))}
-      
-      {/* Steam wisps */}
-      <g opacity="0.3">
-        <path d="M180,70 Q185,50 180,30" fill="none" stroke={colors.bean} strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M195,75 Q200,55 195,35" fill="none" stroke={colors.bean} strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M210,70 Q215,50 210,30" fill="none" stroke={colors.bean} strokeWidth="1.5" strokeLinecap="round" />
+
+      {/* Aroma/steam wisps */}
+      <g opacity="0.25">
+        <path d="M175,65 Q180,45 175,25" fill="none" stroke={p.bean} strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M195,60 Q200,40 195,20" fill="none" stroke={p.bean} strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M215,65 Q220,45 215,25" fill="none" stroke={p.bean} strokeWidth="1.5" strokeLinecap="round" />
       </g>
     </svg>
   );
